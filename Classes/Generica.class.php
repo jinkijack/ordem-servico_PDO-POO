@@ -20,9 +20,7 @@ class Generica
             $query->bindParam(1, $email);
             $query->bindParam(2, $senhamd5);
             $query->execute();
-            $retorno = $query->fetch(PDO::FETCH_ASSOC);
-
-            return $retorno;
+            return $query->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $ex) {
             return 'error' . $ex->getMessage();
         }
@@ -37,9 +35,7 @@ class Generica
 
             $query->bindParam(1, $codigo);
             $query->execute();
-            $lista = $query->fetch(PDO::FETCH_ASSOC);
-
-            return $lista;
+            return $query->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $ex) {
             return 'error' . $ex->getMessage();
         }
@@ -134,12 +130,53 @@ class Generica
                         ORDER BY nome");
 
             $query->execute();
-            $lista = $query->fetchAll(PDO::FETCH_ASSOC);
-            return $lista;
+            return $query->fetchAll(PDO::FETCH_ASSOC);
             
         }catch(PDOException $ex){
             return 'error' . $ex->getMessage();
         }
     }
-    
+
+
+    function cadastraDados($tabela, $valores){
+        $placeholders = implode(',', array_fill(0, count($valores), '?'));
+
+        $colunas = implode(',', array_keys($valores));
+
+        $query = $this->con->conectar()->prepare("INSERT INTO $tabela ($colunas) VALUES ($placeholders)");
+
+        $i = 1;
+        foreach ($valores as &$valor) {
+            $query->bindParam($i++, $valor);
+        }
+
+        $retorno = $query->execute();
+        if($retorno){
+            return 1;
+        } else{
+            return 0;
+        }
+    }
+
+
+    function editarDados($tabela, $valores, $condicao) {
+        $colunas = implode('=?, ', array_keys($valores)) . '=?';
+
+        $query = $this->con->conectar()->prepare("UPDATE $tabela SET $colunas WHERE $condicao");
+
+        $i = 1;
+        foreach ($valores as &$valor) {
+            $query->bindParam($i++, $valor);
+        }
+
+        $retorno = $query->execute();
+        if ($retorno) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+
+
 }
